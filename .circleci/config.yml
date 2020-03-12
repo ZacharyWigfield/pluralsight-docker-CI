@@ -7,9 +7,11 @@ jobs:
 #       - checkout
 #       - run: <command>
   test:
-    test:
-      override:    
-        - mocha
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: .././test/test.js
 workflows:
   version: 2
   build_and_test:
