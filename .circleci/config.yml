@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: oniman999/pluralsight-docker-ci # < an arbitrarily chosen docker image.
+      - image: oniman999/pluralsight-docker-ci 
     steps:
       - checkout
       - run:
@@ -10,5 +10,15 @@ jobs:
           name: Trigger docker remotely
           command: curl --request POST --header Content-Type:application/json --data {"build":true} --url https://hub.docker.com/api/build/v1/source/a2a3e4b0-a184-40a9-8dd3-5b7df91b8361/trigger/2a760165-8543-4691-bbdf-4c351becc66c/call/
 
-          
-          #testy testy
+  publish-latest:
+            environment:
+              IMAGE_NAME: building-on-ci
+            docker:
+              - image: oniman999/pluralsight-docker-ci
+            steps:
+              - setup_remote_docker
+              - run:
+                  name: Publish Docker Image to Docker Hub
+                  command: |
+                    echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                    docker push oniman999/pluralsight-docker-ci:latest
