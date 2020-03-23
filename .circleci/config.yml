@@ -1,58 +1,11 @@
-version: 2.1
-executors:
-  docker-publisher:
-    environment:
-      IMAGE_NAME: oniman999/pluralsight-docker-ci
-    docker:
-      - image: circleci/buildpack-deps:stretch
+version: 2
 jobs:
   build:
-    executor: docker-publisher
+    docker:
+      - image: oniman999/pluralsight-docker-ci:latest
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: |
-            docker build -t $IMAGE_NAME:latest .
-      - run:
-          name: Archive Docker image
-          command: docker save -o image.tar $IMAGE_NAME
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./image.tar
-  publish-latest:
-    executor: docker-publisher
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - setup_remote_docker
-      - run:
-          name: Load archived Docker image
-          command: docker load -i /tmp/workspace/image.tar
-      - run:
-          name: Publish Docker Image to Docker Hub
-          command: |
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push $IMAGE_NAME:latest
       - run:
           # example curl request from dockerhub documentation
           name: Trigger docker remotely
-          command: curl --data build=true -X POST https://hub.docker.com/api/build/v1/source/a2a3e4b0-a184-40a9-8dd3-5b7df91b8361/trigger/2a760165-8543-4691-bbdf-4c351becc66c/call/
-workflows:
-  version: 2
-  build-master:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: master
-      - publish-latest:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-
-              #test
+          command: curl --data build=true -X POST https://registry.hub.docker.com/u/svendowideit/testhook/trigger/be579c82-7c0e-11e4-81c4-0242ac110020/
